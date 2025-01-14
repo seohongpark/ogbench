@@ -33,7 +33,7 @@ def load_dataset(dataset_path, ob_dtype=np.float32, action_dtype=np.float32, com
             dtype = action_dtype
         else:
             dtype = np.float32
-        dataset[k] = file[k][...].astype(dtype)
+        dataset[k] = file[k][...].astype(dtype, copy=False)
 
     # Example:
     # Assume each trajectory has length 4, and (s0, a0, s1), (s1, a1, s2), (s2, a2, s3), (s3, a3, s4) are transition
