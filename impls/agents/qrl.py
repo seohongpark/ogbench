@@ -35,7 +35,7 @@ class QRLAgent(flax.struct.PyTreeNode):
 
         # Apply loss shaping following the original implementation.
         d_neg_loss = (100 * jax.nn.softplus(5 - d_neg / 100)).mean()
-        d_pos_loss = (jax.nn.relu(d_pos + batch['rewards']) ** 2).mean()
+        d_pos_loss = (jax.nn.relu(d_pos + batch['rewards']) ** 2).mean() # the reward of the goal is not -1
         
         value_loss = d_neg_loss + d_pos_loss * jax.lax.stop_gradient(lam)
         lam_loss = lam * (self.config['eps'] - jax.lax.stop_gradient(d_pos_loss))
