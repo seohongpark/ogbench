@@ -35,8 +35,8 @@ class QRLAgent(flax.struct.PyTreeNode):
 
         # Apply loss shaping following the original implementation.
         d_neg_loss = (100 * jax.nn.softplus(5 - d_neg / 100)).mean()
-        d_pos_loss = (jax.nn.relu(d_pos - 1) ** 2).mean()
-
+        d_pos_loss = (jax.nn.relu(d_pos + batch['rewards']) ** 2).mean()
+        
         value_loss = d_neg_loss + d_pos_loss * jax.lax.stop_gradient(lam)
         lam_loss = lam * (self.config['eps'] - jax.lax.stop_gradient(d_pos_loss))
 
@@ -320,7 +320,7 @@ def get_config():
             actor_p_trajgoal=1.0,  # Probability of using a future state in the same trajectory as the actor goal.
             actor_p_randomgoal=0.0,  # Probability of using a random state as the actor goal.
             actor_geom_sample=False,  # Whether to use geometric sampling for future actor goals.
-            gc_negative=False,  # Unused (defined for compatibility with GCDataset).
+            gc_negative=True,  # negative rewards
             p_aug=0.0,  # Probability of applying image augmentation.
             frame_stack=ml_collections.config_dict.placeholder(int),  # Number of frames to stack.
         )
