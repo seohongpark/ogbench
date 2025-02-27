@@ -17,7 +17,7 @@ class HumanoidEnv(MujocoEnv, utils.EzPickle):
 
     xml_file = os.path.join(os.path.dirname(__file__), 'assets', 'humanoid.xml')
     metadata = {
-        'render_modes': ['human', 'rgb_array', 'depth_array'],
+        'render_modes': ['human', 'rgb_array', 'depth_array', 'rgbd_tuple'],
         'render_fps': 40,
     }
 
