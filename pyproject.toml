@@ -5,7 +5,7 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "ogbench"
 version = "1.1.5"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "mujoco >= 3.1.6",
     "dm_control >= 1.0.20",
