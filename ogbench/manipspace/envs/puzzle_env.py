@@ -685,9 +685,9 @@ class PuzzleEnv(ManipSpaceEnv):
         """Return the oracle goal representation of the current state."""
         return self._cur_button_states.astype(np.float64)
 
-    def compute_reward(self, ob, action):
+    def compute_reward(self):
         if self._reward_task_id is None:
-            return super().compute_reward(ob, action)
+            return super().compute_reward()
 
         # Compute the reward based on the task.
         successes = self._compute_successes()

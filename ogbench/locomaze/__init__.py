@@ -9,6 +9,7 @@ visual_dict = dict(
 )
 singletask_dict = dict(
     add_noise_to_goal=False,
+    success_timing='pre',
 )
 
 # Environments for offline goal-conditioned RL.

@@ -26,6 +26,7 @@ class ManipSpaceEnv(CustomMuJoCoEnv):
         physics_timestep=0.002,
         control_timestep=0.05,
         terminate_at_goal=True,
+        success_timing='post',
         mode='task',
         visualize_info=True,
         pixel_transparent_arm=True,
@@ -40,6 +41,8 @@ class ManipSpaceEnv(CustomMuJoCoEnv):
             physics_timestep: Physics timestep.
             control_timestep: Control timestep.
             terminate_at_goal: Whether to terminate the episode when the goal is reached.
+            success_timing: When to compute the success and terminated flags and the reward. Either 'pre' (before taking
+                the action) or 'post' (after taking the action).
             mode: Mode of the environment. Either 'task' or 'data_collection'. In 'task' mode, the environment is used
                 for training and evaluation. In 'data_collection' mode, the environment is used for collecting offline
                 data.
@@ -89,6 +92,7 @@ class ManipSpaceEnv(CustomMuJoCoEnv):
 
         self._ob_type = ob_type
         self._terminate_at_goal = terminate_at_goal
+        self._success_timing = success_timing
         self._mode = mode
         self._visualize_info = visualize_info
         self._pixel_transparent_arm = pixel_transparent_arm
@@ -96,6 +100,7 @@ class ManipSpaceEnv(CustomMuJoCoEnv):
         self._use_oracle_rep = use_oracle_rep
 
         assert ob_type in ['states', 'pixels']
+        assert success_timing in ['pre', 'post']
 
         # Initialize inverse kinematics controller.
         ik_mjcf = mjcf.from_path((self._desc_dir / 'universal_robots_ur5e' / 'ur5e.xml'), escape_separators=True)
@@ -306,6 +311,35 @@ class ManipSpaceEnv(CustomMuJoCoEnv):
 
         return super().reset(*args, **kwargs)
 
+    def step(self, action):
+        if self._reset_next_step:
+            return self.reset()
+
+        if self._success_timing == 'pre':
+            success = self._success
+            terminated = self.terminate_episode()
+            reward = self.compute_reward()
+
+        action = np.array(action)
+        self.set_control(action)
+        self.pre_step()
+        mujoco.mj_step(self._model, self._data, nstep=self._n_steps)
+        mujoco.mj_rnePostConstraint(self._model, self._data)  # Compute contact forces.
+        self.post_step()
+
+        if self._success_timing == 'post':
+            success = self._success
+            terminated = self.terminate_episode()
+            reward = self.compute_reward()
+
+        truncated = self.truncate_episode()
+        ob = self.compute_observation()
+        info = self.get_step_info()
+
+        info['success'] = success
+
+        return ob, reward, terminated, truncated, info
+
     def initialize_arm(self):
         # Sample initial effector position and orientation.
         eff_pos = self.np_random.uniform(*self._arm_sampling_bounds)
@@ -444,7 +478,7 @@ class ManipSpaceEnv(CustomMuJoCoEnv):
 
             return np.concatenate(ob)
 
-    def compute_reward(self, ob, action):
+    def compute_reward(self):
         return 1.0 if self._success else 0.0
 
     def get_reset_info(self):
@@ -457,7 +491,6 @@ class ManipSpaceEnv(CustomMuJoCoEnv):
 
     def get_step_info(self):
         ob_info = self.compute_ob_info()
-        ob_info['success'] = self._success
         return ob_info
 
     def terminate_episode(self):

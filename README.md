@@ -50,8 +50,6 @@ and [datasets](data_gen_scripts/commands.sh).
 - `pip`-installable, easy-to-use APIs based on Gymnasium.
 - No major dependencies other than MuJoCo.
 
-
-
 # Quick Start
 
 ### Installation
@@ -270,7 +268,6 @@ ogbench.download_datasets(
 )
 ```
 
-
 # Reference Implementations
 
 OGBench also provides JAX-based reference implementations of six offline goal-conditioned RL algorithms
@@ -360,7 +357,6 @@ This allows gradients to flow from the low-level actor loss to the subgoal repre
 - In discrete-action environments (e.g., Powderworld), don't forget to set `--agent.discrete=True`.
 - In Powderworld, use `--eval_temperature=0.3`, which helps prevent the agent from getting stuck in certain states.
 
-
 # Reproducing Datasets
 
 We provide the full scripts and exact command-line flags used to produce all the datasets in OGBench.
@@ -428,7 +424,16 @@ They can be manually downloaded from the following links (see [this repository](
   - `puzzle-4x5-play-100m-v0`: https://rail.eecs.berkeley.edu/datasets/ogbench/puzzle-4x5-play-100m-v0
   - `puzzle-4x6-play-100m-v0`: https://rail.eecs.berkeley.edu/datasets/ogbench/puzzle-4x6-play-100m-v0
 
-  
+# Caveats
+
+- Starting from OGBench 1.2.0, `singletask` environments compute `reward`, `terminated`, and `info['success']`
+based on the current state (i.e., compute `r(s)` instead of `r(s')` for an `(s, a, s')` tuple)
+to be consistent with the dataset reward structure.
+In earlier versions, they were computed based on the next state (`s'`),
+so this change may lead to slight differences in evaluation results (though we expect the differences to be negligible).
+You can set `success_timing='post'` in `ogbench.make_env_and_datasets` to restore the previous behavior if needed.
+We also note that this change only affects `singletask` environments; goal-conditioned environments remain unchanged
+(they always compute `terminated` and `info['success']` based on `s'` even in the latest version).
 
 # Acknowledgments
 

@@ -40,6 +40,7 @@ def make_maze_env(loco_env_type, maze_env_type, *args, **kwargs):
             maze_unit=4.0,
             maze_height=0.5,
             terminate_at_goal=True,
+            success_timing='post',
             ob_type='states',
             add_noise_to_goal=True,
             reward_task_id=None,
@@ -54,6 +55,8 @@ def make_maze_env(loco_env_type, maze_env_type, *args, **kwargs):
                 maze_unit: Size of a maze unit block.
                 maze_height: Height of the maze walls.
                 terminate_at_goal: Whether to terminate the episode when the goal is reached.
+                success_timing: When to compute the success and terminated flags and the reward. Either 'pre' (before
+                    taking the action) or 'post' (after taking the action).
                 ob_type: Observation type. Either 'states' or 'pixels'.
                 add_noise_to_goal: Whether to add noise to the goal position.
                 reward_task_id: Task ID for single-task RL. If this is not None, the environment operates in a
@@ -67,11 +70,14 @@ def make_maze_env(loco_env_type, maze_env_type, *args, **kwargs):
             self._maze_unit = maze_unit
             self._maze_height = maze_height
             self._terminate_at_goal = terminate_at_goal
+            self._success_timing = success_timing
             self._ob_type = ob_type
             self._add_noise_to_goal = add_noise_to_goal
             self._reward_task_id = reward_task_id
             self._use_oracle_rep = use_oracle_rep
+
             assert ob_type in ['states', 'pixels']
+            assert success_timing in ['pre', 'post']
 
             # Define constants.
             self._offset_x = 4
@@ -425,7 +431,13 @@ def make_maze_env(loco_env_type, maze_env_type, *args, **kwargs):
             return ob, info
 
         def step(self, action):
+            if self._success_timing == 'pre':
+                success = self.compute_success()
+
             ob, reward, terminated, truncated, info = super().step(action)
+
+            if self._success_timing == 'post':
+                success = self.compute_success()
 
             if self._teleport_info is not None:
                 # Check if the agent is close to a inbound teleport.
@@ -438,8 +450,7 @@ def make_maze_env(loco_env_type, maze_env_type, *args, **kwargs):
                         self.set_xy(np.array(teleport_out_xy))
                         break
 
-            # Check if the agent has reached the goal.
-            if np.linalg.norm(self.get_xy() - self.cur_goal_xy) <= self._goal_tol:
+            if success:
                 if self._terminate_at_goal:
                     terminated = True
                 info['success'] = 1.0
@@ -471,6 +482,12 @@ def make_maze_env(loco_env_type, maze_env_type, *args, **kwargs):
         def get_oracle_rep(self):
             """Return the oracle goal representation (i.e., the goal position)."""
             return np.array(self.cur_goal_xy)
+
+        def compute_success(self):
+            if np.linalg.norm(self.get_xy() - self.cur_goal_xy) <= self._goal_tol:
+                return True
+            else:
+                return False
 
         def set_goal(self, goal_ij=None, goal_xy=None):
             """Set the goal position and update the target object."""
@@ -669,10 +686,15 @@ def make_maze_env(loco_env_type, maze_env_type, *args, **kwargs):
             return ob, info
 
         def step(self, action):
+            if self._success_timing == 'pre':
+                success = self.compute_success()
+
             ob, reward, terminated, truncated, info = super(MazeEnv, self).step(action)
 
-            # Check if the ball has reached the goal.
-            if np.linalg.norm(self.get_agent_ball_xy()[1] - self.cur_goal_xy) <= self._goal_tol:
+            if self._success_timing == 'post':
+                success = self.compute_success()
+
+            if success:
                 if self._terminate_at_goal:
                     terminated = True
                 info['success'] = 1.0
@@ -686,6 +708,12 @@ def make_maze_env(loco_env_type, maze_env_type, *args, **kwargs):
                 reward = reward - 1.0  # -1 (failure) or 0 (success).
 
             return ob, reward, terminated, truncated, info
+
+        def compute_success(self):
+            if np.linalg.norm(self.get_agent_ball_xy()[1] - self.cur_goal_xy) <= self._goal_tol:
+                return True
+            else:
+                return False
 
         def get_agent_ball_xy(self):
             agent_xy = self.data.qpos[:2].copy()

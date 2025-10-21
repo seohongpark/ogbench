@@ -8,11 +8,15 @@ visual_dict = dict(
 )
 cube_singletask_dict = dict(
     permute_blocks=False,
+    success_timing='pre',
 )
 scene_singletask_dict = dict(
     permute_blocks=False,
+    success_timing='pre',
 )
-puzzle_singletask_dict = dict()
+puzzle_singletask_dict = dict(
+    success_timing='pre',
+)
 
 # Environments for offline goal-conditioned RL.
 register(

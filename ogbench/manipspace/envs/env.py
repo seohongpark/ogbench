@@ -88,7 +88,7 @@ class CustomMuJoCoEnv(gym.Env, abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def compute_reward(self, ob, action) -> SupportsFloat:
+    def compute_reward(self) -> SupportsFloat:
         """Compute the reward at each timestep."""
         raise NotImplementedError
 
@@ -238,7 +238,7 @@ class CustomMuJoCoEnv(gym.Env, abc.ABC):
         terminated = self.terminate_episode()
         truncated = self.truncate_episode()
         ob = self.compute_observation()
-        reward = self.compute_reward(ob, action)
+        reward = self.compute_reward()
         info = self.get_step_info()
         return ob, reward, terminated, truncated, info
 
