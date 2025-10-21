@@ -1,13 +1,14 @@
 # Change log
 
 ## ogbench 1.2.0 (2025-10-20)
-- Make `singletask` environments compute rewards based on `s` instead of `s'` for an `(s, a, s')` tuple  (#34).
+- Make `singletask` environments compute rewards based on `s` instead of `s'` for an `(s, a, s')` tuple.
+See this [discussion](README.md/#caveats).
 
 ## ogbench 1.1.5 (2025-07-02)
-- Make locomotion environments compatible with the headless mode (#24).
+- Make locomotion environments compatible with the headless mode.
 
 ## ogbench 1.1.4 (2025-06-17)
-- Fix the black rendering issue in locomotion environments (#19).
+- Fix the black rendering issue in locomotion environments.
 
 ## ogbench 1.1.3 (2025-06-03)
 - Add the `cube-octuple` task.
