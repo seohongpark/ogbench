@@ -2,7 +2,7 @@
 
 ## ogbench 1.2.0 (2025-10-20)
 - Make `singletask` environments compute rewards based on `s` instead of `s'` for an `(s, a, s')` tuple.
-See this [discussion](README.md/#caveats).
+See [this discussion](README.md/#caveats).
 
 ## ogbench 1.1.5 (2025-07-02)
 - Make locomotion environments compatible with the headless mode.
