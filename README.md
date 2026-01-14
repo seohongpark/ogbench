@@ -306,6 +306,13 @@ To train an agent, you can run the `main.py` script.
 Training metrics, evaluation metrics, and videos are logged via `wandb` by default.
 Here are some example commands (see [hyperparameters.sh](impls/hyperparameters.sh) for the full list of commands):
 
+> [!NOTE]
+> If you are running on a remote/headless server without a display, you can use EGL for rendering by setting the `MUJOCO_GL` environment variable:
+> ```shell
+> MUJOCO_GL=egl python main.py --env_name=antmaze-large-navigate-v0 --agent=agents/gcbc.py
+> ```
+
+
 ```shell
 # antmaze-large-navigate-v0 (GCBC)
 python main.py --env_name=antmaze-large-navigate-v0 --agent=agents/gcbc.py
