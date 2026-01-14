@@ -1,5 +1,8 @@
 # Change log
 
+## ogbench 1.2.1 (2026-01-14)
+- Make it compatible with the latest version of `numpy` (2.0.0+).
+
 ## ogbench 1.2.0 (2025-10-20)
 - Make `singletask` environments compute rewards based on `s` instead of `s'` for an `(s, a, s')` tuple.
 See [this discussion](README.md/#caveats).
