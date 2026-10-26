@@ -1,5 +1,8 @@
 # Change log
 
+## ogbench 1.2.2 (2026-10-26)
+- Exclude MuJoCo 3.9.0 from the supported versions of MuJoCo.
+
 ## ogbench 1.2.1 (2026-01-14)
 - Make it compatible with the latest version of `numpy` (2.0.0+).
 
