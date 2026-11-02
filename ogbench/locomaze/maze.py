@@ -498,7 +498,7 @@ def make_maze_env(loco_env_type, maze_env_type, *args, **kwargs):
             else:
                 self.cur_goal_xy = goal_xy
             if self._ob_type == 'states':
-                self.model.geom('target').pos[:2] = goal_xy
+                self.model.geom('target').pos[:2] = self.cur_goal_xy
 
         def get_oracle_subgoal(self, start_xy, goal_xy):
             """Get the oracle subgoal for the agent.
@@ -546,7 +546,9 @@ def make_maze_env(loco_env_type, maze_env_type, *args, **kwargs):
                     and bfs_map[ni, nj] < bfs_map[subgoal_ij[0], subgoal_ij[1]]
                 ):
                     subgoal_ij = (ni, nj)
-            subgoal_xy = self.ij_to_xy(subgoal_ij)
+            # Once the agent enters the goal cell, direct it to the exact goal
+            # position instead of the cell center.
+            subgoal_xy = goal_xy if start_ij == goal_ij else self.ij_to_xy(subgoal_ij)
             return np.array(subgoal_xy), bfs_map
 
         def xy_to_ij(self, xy):
