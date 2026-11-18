@@ -119,15 +119,16 @@ def download_datasets(dataset_names, dataset_dir=DEFAULT_DATASET_DIR):
             print('Downloading dataset from:', dataset_url)
             response = urllib.request.urlopen(dataset_url)
             tmp_dataset_file_path = f'{dataset_file_path}.tmp'
-            with tqdm.wrapattr(
-                open(tmp_dataset_file_path, 'wb'),
-                'write',
-                miniters=1,
-                desc=dataset_url.split('/')[-1],
-                total=getattr(response, 'length', None),
-            ) as file:
-                for chunk in response:
-                    file.write(chunk)
+            with open(tmp_dataset_file_path, 'wb') as tmp_file:
+                with tqdm.wrapattr(
+                    tmp_file,
+                    'write',
+                    miniters=1,
+                    desc=dataset_url.split('/')[-1],
+                    total=getattr(response, 'length', None),
+                ) as file:
+                    for chunk in response:
+                        file.write(chunk)
             os.rename(tmp_dataset_file_path, dataset_file_path)
 
 
